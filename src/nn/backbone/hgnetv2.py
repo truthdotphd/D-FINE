@@ -525,10 +525,10 @@ class HGNetv2(nn.Module):
                         download_url, map_location="cpu", model_dir=local_model_dir
                     )
                     print(f"Loaded stage1 {name} HGNetV2 from URL.")
-                    
+
                 # Wait for rank 0 to download the model
                 safe_barrier()
-                
+
                 # All processes load the downloaded model
                 model_path = local_model_dir + "PPHGNetV2_" + name + "_stage1.pth"
                 state = torch.load(model_path, map_location="cpu")
