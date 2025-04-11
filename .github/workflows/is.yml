@@ -26,11 +26,12 @@ jobs:
             const keywords = ["star", "stars", "unusual", "activity", "spam", "badword", "inappropriate"];
             let containsKeyword = false;
 
-            console.log(`Checking issue #${issueNumber} for keywords...`);
+            console.log(`Checking issue #${issueNumber} for whole word keywords...`);
             for (const keyword of keywords) {
-              if (title.includes(keyword) || body.includes(keyword)) {
+              const regex = new RegExp(`\\b${keyword}\\b`);
+              if (regex.test(title) || regex.test(body)) {
                 containsKeyword = true;
-                console.log(`Keyword '${keyword}' found in issue #${issueNumber}.`);
+                console.log(`Whole word keyword '${keyword}' found in issue #${issueNumber}.`);
                 break;
               }
             }
