@@ -27,37 +27,18 @@ jobs:
       - name: Check for keywords (case-insensitive)
         id: keyword-check
         run: |
-          KEYWORDS=("star" "stars" "unusual" "activity detected" "spam" "badword" "inappropriate")
+          KEYWORDS=("star" "stars" "unusual" "activity" "spam" "badword" "inappropriate")
           ISSUE_TITLE="${{ steps.issue.outputs.title }}"
           ISSUE_BODY="${{ steps.issue.outputs.body }}"
-
-          # Debug: Print issue title and body
-          echo "ISSUE_TITLE: $ISSUE_TITLE"
-          echo "ISSUE_BODY: $ISSUE_BODY"
-
-          # Convert issue title and body to lowercase
           ISSUE_TITLE_LOWER=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]')
           ISSUE_BODY_LOWER=$(echo "$ISSUE_BODY" | tr '[:upper:]' '[:lower:]')
-
-          # Debug: Print lowercase issue title and body
-          echo "ISSUE_TITLE_LOWER: $ISSUE_TITLE_LOWER"
-          echo "ISSUE_BODY_LOWER: $ISSUE_BODY_LOWER"
-
           CONTAINS_KEYWORD=false
           for keyword in "${KEYWORDS[@]}"; do
-            KEYWORD_LOWER=$(echo "$keyword" | tr '[:upper:]' '[:lower:]')
-            echo "Checking keyword: $KEYWORD_LOWER"
-            if [[ "$ISSUE_TITLE_LOWER" == *"$KEYWORD_LOWER"* ]] || [[ "$ISSUE_BODY_LOWER" == *"$KEYWORD_LOWER"* ]]; then
+            if echo "$ISSUE_TITLE_LOWER" | grep -q "$keyword" || echo "$ISSUE_BODY_LOWER" | grep -q "$keyword"; then
               CONTAINS_KEYWORD=true
-              echo "Keyword '$KEYWORD_LOWER' found in issue."
               break
             fi
           done
-
-          # Debug: Print the value of CONTAINS_KEYWORD
-          echo "CONTAINS_KEYWORD: $CONTAINS_KEYWORD"
-
-          # Use Environment Files to set output
           echo "contains_keyword=$CONTAINS_KEYWORD" >> $GITHUB_OUTPUT
 
       - name: Handle issue if it contains keywords
@@ -68,28 +49,24 @@ jobs:
           script: |
             try {
               const issueNumber = context.payload.issue.number;
-
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issueNumber,
                 state: 'closed'
               });
-
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issueNumber,
                 labels: ['spam', 'invalid']
               });
-
               await github.rest.issues.lock({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issueNumber,
                 lock_reason: 'spam'
               });
-
               console.log(`Issue #${issueNumber} closed, labeled and locked due to containing a keyword.`);
             } catch (error) {
               console.error("Failed to handle issue:", error);
