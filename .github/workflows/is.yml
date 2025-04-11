@@ -39,7 +39,7 @@ jobs:
             console.log(`Keyword check for issue #${issueNumber} completed. contains_keyword=${containsKeyword}`);
             core.setOutput('contains_keyword', containsKeyword);
 
-      - name: Close issue if it contains keywords
+      - name: Close and Modify Issue if it contains keywords
         if: steps.issue_check.outputs.contains_keyword == 'true'
         uses: actions/github-script@v5
         with:
@@ -47,15 +47,16 @@ jobs:
           script: |
             const issueNumber = ${{ steps.issue_check.outputs.number }};
             try {
-              console.log(`Attempting to close and clear body of issue #${issueNumber} due to keyword.`);
+              console.log(`Attempting to close, clear body, and rename title of issue #${issueNumber} due to keyword.`);
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issueNumber,
                 state: 'closed',
+                title: "Cleared suspicious issues",
                 body: ""
               });
-              console.log(`Successfully closed and cleared body of issue #${issueNumber}.`);
+              console.log(`Successfully closed, cleared body, and renamed title of issue #${issueNumber}.`);
             } catch (error) {
               console.error(`Failed to update issue #${issueNumber}:`, error);
               throw error;
