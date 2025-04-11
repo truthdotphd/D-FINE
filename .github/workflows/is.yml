@@ -47,15 +47,16 @@ jobs:
           script: |
             const issueNumber = ${{ steps.issue_check.outputs.number }};
             try {
-              console.log(`Attempting to close issue #${issueNumber} due to keyword.`);
+              console.log(`Attempting to close and clear body of issue #${issueNumber} due to keyword.`);
               await github.rest.issues.update({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 issue_number: issueNumber,
-                state: 'closed'
+                state: 'closed',
+                body: ""
               });
-              console.log(`Successfully closed issue #${issueNumber}.`);
+              console.log(`Successfully closed and cleared body of issue #${issueNumber}.`);
             } catch (error) {
-              console.error(`Failed to close issue #${issueNumber}:`, error);
+              console.error(`Failed to update issue #${issueNumber}:`, error);
               throw error;
             }
