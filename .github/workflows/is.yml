@@ -18,13 +18,12 @@ jobs:
         with:
           script: |
             const issue = context.payload.issue;
-            console.log("Issue payload:", issue);
             core.setOutput('id', issue.id);
             core.setOutput('title', issue.title || "");
             core.setOutput('body', issue.body || "");
             core.setOutput('number', issue.number);
 
-      - name: Check for keywords (case-insensitive)
+      - name: Check for keywords
         id: keyword-check
         run: |
           KEYWORDS=("star" "stars" "unusual" "activity" "spam" "badword" "inappropriate")
@@ -41,7 +40,7 @@ jobs:
           done
           echo "contains_keyword=$CONTAINS_KEYWORD" >> $GITHUB_OUTPUT
 
-      - name: Handle issue if it contains keywords
+      - name: Close issue if it contains keywords
         if: steps.keyword-check.outputs.contains_keyword == 'true'
         uses: actions/github-script@v5
         with:
@@ -55,6 +54,8 @@ jobs:
                 issue_number: issueNumber,
                 state: 'closed'
               });
+              console.log(`Issue #${issueNumber} closed due to containing a keyword.`);
+            } catch (error) {
               await github.rest.issues.addLabels({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
