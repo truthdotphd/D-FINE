@@ -23,7 +23,7 @@ jobs:
             const body = (issue.body || "").toLowerCase();
             core.setOutput('number', issueNumber);
 
-            const keywords = ["star", "stars", "unusual", "activity", "spam", "badword", "inappropriate"];
+            const keywords = ["spam", "badword", "inappropriate", "suspicious", "unusual", "star", "stars", "buy", "buying"];
             let containsKeyword = false;
 
             console.log(`Checking issue #${issueNumber} for whole word keywords...`);
